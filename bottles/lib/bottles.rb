@@ -9,60 +9,102 @@ class Bottles
   end
 
   def verse(number)
-    container_number = ContainerNumber.new(number)
-    successor        = ContainerNumber.new(container_number.successor)
+    container_number = ContainerNumber.for(number)
 
-    "#{container_number.label.capitalize} #{container_number.container} of beer on the wall, " +
-    "#{container_number.label} #{container_number.container} of beer.\n" +
+    "#{container_number} of beer on the wall, ".capitalize +
+    "#{container_number} of beer.\n" +
     "#{container_number.action}, " +
-    "#{successor.label} #{successor.container} of beer on the wall.\n"
+    "#{container_number.successor} of beer on the wall.\n"
   end
 end
 
 class ContainerNumber
   attr_reader :number
 
+  def self.for(number)    
+    case number
+    when 0
+      ContainerNumber0
+    when 1
+      ContainerNumber1
+    when 6
+      ContainerNumber6
+    else
+      ContainerNumber
+    end.new(number)
+  end
+
   def initialize(number)
     @number = number
   end
 
+  def to_s
+    "#{label} #{container}"
+  end
+
   def container
-    if number == 1
-      "bottle"
-    else
-      "bottles"
-    end
+    "bottles"
   end
 
   def pronoun
-    if number == 1
-      "it"
-    else
-      "one"
-    end
+    "one"
   end
 
   def label
-    if number == 0
-      "no more"
-    else
-      number.to_s
-    end
+    number.to_s
   end
 
   def action
-    if number == 0
-      "Go to the store and buy some more"
-    else
-      "Take #{pronoun} down and pass it around"
-    end
+    "Take #{pronoun} down and pass it around"
   end
 
   def successor
-    if number == 0
-      99
-    else
-      number - 1
-    end
+    (number - 1).to_container_number
+  end
+end
+
+class Integer
+  def to_container_number
+    ContainerNumber.for(self)
+  end
+end
+
+def ContainerNumber(number)
+  return number if number.is_a?(ContainerNumber)
+  ContainerNumber.for(number)
+end
+
+class ContainerNumber0 < ContainerNumber
+  def label
+    "no more"
+  end
+
+  def action
+    "Go to the store and buy some more"
+  end
+
+  def successor
+    # 99.to_container_number
+    ContainerNumber(99)
+  end
+end
+
+class ContainerNumber1 < ContainerNumber
+  def container
+    "bottle"
+  end
+
+  def pronoun
+    "it"
+  end
+end
+
+class ContainerNumber6 < ContainerNumber
+  def label
+    1
+  end
+
+  def container
+    'six-pack'
   end
 end
